@@ -90,11 +90,26 @@ http://localhost:3000/tasks
 
 | Method | Endpoint | Description | Status Codes |
 |--------|----------|-------------|--------------|
-| GET | `/tasks` | Retrieve all tasks | 200, 500 |
+| GET | `/tasks` | Retrieve all tasks (with optional filtering & sorting) | 200, 500 |
+| GET | `/tasks/priority/:level` | Retrieve tasks by priority level | 200, 400, 500 |
 | GET | `/tasks/:id` | Retrieve a specific task by ID | 200, 404, 500 |
-| POST | `/tasks` | Create a new task | 201, 500 |
-| PUT | `/tasks/:id` | Update an existing task | 200, 404, 500 |
-| DELETE | `/tasks/:id` | Delete a task | 204, 404, 500 |
+| POST | `/tasks` | Create a new task | 201, 400, 500 |
+| PUT | `/tasks/:id` | Update an existing task | 200, 400, 404, 500 |
+| DELETE | `/tasks/:id` | Delete a task | 200, 404, 500 |
+
+### Query Parameters for GET /tasks
+
+| Parameter | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `completed` | boolean | Filter by completion status | `?completed=true` |
+| `sort` | string | Sort by creation date (`asc` or `desc`) | `?sort=desc` |
+
+### Priority Levels
+
+Tasks support three priority levels:
+- `low` - Low priority tasks
+- `medium` - Medium priority tasks (default)
+- `high` - High priority tasks
 
 ## Request/Response Examples
 
@@ -109,20 +124,95 @@ GET http://localhost:3000/tasks
 [
   {
     "id": 1,
-    "title": "Complete assignment",
-    "description": "Finish the task manager API",
-    "completed": false
+    "title": "Set up environment",
+    "description": "Install Node.js, npm, and git",
+    "completed": true,
+    "priority": "high",
+    "createdAt": "2024-01-01T10:00:00.000Z"
   },
   {
     "id": 2,
-    "title": "Review code",
-    "description": "Review pull requests",
-    "completed": true
+    "title": "Create a new project",
+    "description": "Create a new project using the Express application generator",
+    "completed": false,
+    "priority": "medium",
+    "createdAt": "2024-01-02T10:00:00.000Z"
   }
 ]
 ```
 
-### 2. Get a Specific Task
+### 2. Get All Completed Tasks (Filtered)
+**Request:**
+```http
+GET http://localhost:3000/tasks?completed=true
+```
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "id": 1,
+    "title": "Set up environment",
+    "description": "Install Node.js, npm, and git",
+    "completed": true,
+    "priority": "high",
+    "createdAt": "2024-01-01T10:00:00.000Z"
+  }
+]
+```
+
+### 3. Get All Tasks Sorted by Date (Newest First)
+**Request:**
+```http
+GET http://localhost:3000/tasks?sort=desc
+```
+
+**Response:** `200 OK` - Returns tasks sorted by creation date in descending order (newest first)
+
+### 4. Get Tasks with Filtering and Sorting Combined
+**Request:**
+```http
+GET http://localhost:3000/tasks?completed=false&sort=asc
+```
+
+**Response:** `200 OK` - Returns incomplete tasks sorted by date (oldest first)
+
+### 5. Get Tasks by Priority Level
+**Request:**
+```http
+GET http://localhost:3000/tasks/priority/high
+```
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "id": 1,
+    "title": "Set up environment",
+    "description": "Install Node.js, npm, and git",
+    "completed": true,
+    "priority": "high",
+    "createdAt": "2024-01-01T10:00:00.000Z"
+  },
+  {
+    "id": 4,
+    "title": "Install Express",
+    "description": "Install Express",
+    "completed": false,
+    "priority": "high",
+    "createdAt": "2024-01-04T10:00:00.000Z"
+  }
+]
+```
+
+**Error Response (Invalid Priority):** `400 Bad Request`
+```json
+{
+  "error": "Invalid priority level. Must be low, medium, or high"
+}
+```
+
+### 6. Get a Specific Task
 **Request:**
 ```http
 GET http://localhost:3000/tasks/1
@@ -132,9 +222,11 @@ GET http://localhost:3000/tasks/1
 ```json
 {
   "id": 1,
-  "title": "Complete assignment",
-  "description": "Finish the task manager API",
-  "completed": false
+  "title": "Set up environment",
+  "description": "Install Node.js, npm, and git",
+  "completed": true,
+  "priority": "high",
+  "createdAt": "2024-01-01T10:00:00.000Z"
 }
 ```
 
@@ -145,7 +237,7 @@ GET http://localhost:3000/tasks/1
 }
 ```
 
-### 3. Create a New Task
+### 7. Create a New Task
 **Request:**
 ```http
 POST http://localhost:3000/tasks
@@ -153,22 +245,41 @@ Content-Type: application/json
 
 {
   "title": "Write documentation",
-  "description": "Create README file",
-  "completed": false
+  "description": "Create comprehensive README file",
+  "completed": false,
+  "priority": "high"
 }
 ```
 
 **Response:** `201 Created`
 ```json
 {
-  "id": 3,
+  "id": 16,
   "title": "Write documentation",
-  "description": "Create README file",
-  "completed": false
+  "description": "Create comprehensive README file",
+  "completed": false,
+  "priority": "high",
+  "createdAt": "2026-02-01T10:30:00.000Z"
 }
 ```
 
-### 4. Update a Task
+**Note:** If `priority` is not provided, it defaults to `medium`. The `createdAt` field is automatically generated.
+
+**Error Response (Missing Fields):** `400 Bad Request`
+```json
+{
+  "error": "Invalid task data. Required fields: title, description, completed"
+}
+```
+
+**Error Response (Invalid Priority):** `400 Bad Request`
+```json
+{
+  "error": "Invalid priority. Must be low, medium, or high"
+}
+```
+
+### 8. Update a Task
 **Request:**
 ```http
 PUT http://localhost:3000/tasks/1
@@ -177,7 +288,8 @@ Content-Type: application/json
 {
   "title": "Complete assignment - Updated",
   "description": "Finish the task manager API with tests",
-  "completed": true
+  "completed": true,
+  "priority": "low"
 }
 ```
 
@@ -187,7 +299,9 @@ Content-Type: application/json
   "id": 1,
   "title": "Complete assignment - Updated",
   "description": "Finish the task manager API with tests",
-  "completed": true
+  "completed": true,
+  "priority": "low",
+  "createdAt": "2024-01-01T10:00:00.000Z"
 }
 ```
 
@@ -198,15 +312,24 @@ Content-Type: application/json
 }
 ```
 
-### 5. Delete a Task
+**Error Response (Invalid Data):** `400 Bad Request`
+```json
+{
+  "error": "Invalid priority. Must be low, medium, or high"
+}
+```
+
+### 9. Delete a Task
 **Request:**
 ```http
 DELETE http://localhost:3000/tasks/1
 ```
 
-**Response:** `204 No Content`
-```
-(Empty response body)
+**Response:** `200 OK`
+```json
+{
+  "message": "Task deleted successfully"
+}
 ```
 
 **Error Response:** `404 Not Found`
@@ -251,10 +374,11 @@ task-manager-api-anusha16-debug/
 │
 ├── controllers/
 │   └── taskController.js       # Business logic for task operations
-│       ├── getAllTasks()       # Fetches all tasks
+│       ├── getAllTasks()       # Fetches all tasks (with filtering & sorting)
 │       ├── getTaskById()       # Fetches task by ID
-│       ├── createTask()        # Creates a new task
-│       ├── updateTask()        # Updates existing task
+│       ├── getTasksByPriority() # Fetches tasks by priority level
+│       ├── createTask()        # Creates a new task (with priority)
+│       ├── updateTask()        # Updates existing task (supports priority)
 │       └── deleteTask()        # Deletes a task
 │
 ├── routes/
@@ -262,7 +386,10 @@ task-manager-api-anusha16-debug/
 │       └── Maps HTTP methods to controller functions
 │
 ├── models/
-│   └── courseModal.js          # In-memory data store (tasks array)
+│   └── taskModel.js            # In-memory data store (tasks array)
+│
+├── middleware/
+│   └── loggerMiddleware.js     # Request/response logging middleware
 │
 ├── test/                       # Test files directory
 │   └── *.js                    # Test cases for API endpoints
@@ -370,10 +497,24 @@ npm install
 # Get all tasks
 curl http://localhost:3000/tasks
 
-# Create a task
+# Get completed tasks only
+curl http://localhost:3000/tasks?completed=true
+
+# Get tasks sorted by date (newest first)
+curl "http://localhost:3000/tasks?sort=desc"
+
+# Get high priority tasks
+curl http://localhost:3000/tasks/priority/high
+
+# Create a task with priority
 curl -X POST http://localhost:3000/tasks \
   -H "Content-Type: application/json" \
-  -d '{"title":"New Task","description":"Task description","completed":false}'
+  -d '{"title":"Fix bug","description":"Fix critical bug","completed":false,"priority":"high"}'
+
+# Update task priority
+curl -X PUT http://localhost:3000/tasks/1 \
+  -H "Content-Type: application/json" \
+  -d '{"priority":"low","completed":true}'
 ```
 
 ### Using Postman:
@@ -387,15 +528,40 @@ Create a `.http` file:
 ### Get all tasks
 GET http://localhost:3000/tasks
 
-### Create a task
+### Get completed tasks
+GET http://localhost:3000/tasks?completed=true
+
+### Get tasks sorted by date (newest first)
+GET http://localhost:3000/tasks?sort=desc
+
+### Get high priority tasks
+GET http://localhost:3000/tasks/priority/high
+
+### Get a specific task
+GET http://localhost:3000/tasks/1
+
+### Create a task with priority
 POST http://localhost:3000/tasks
 Content-Type: application/json
 
 {
-  "title": "Test Task",
-  "description": "Testing",
-  "completed": false
+  "title": "Fix critical bug",
+  "description": "Security vulnerability",
+  "completed": false,
+  "priority": "high"
 }
+
+### Update a task
+PUT http://localhost:3000/tasks/1
+Content-Type: application/json
+
+{
+  "completed": true,
+  "priority": "low"
+}
+
+### Delete a task
+DELETE http://localhost:3000/tasks/1
 ```
 
 ## License
@@ -414,6 +580,19 @@ ISC
 - Implement authentication and authorization for security
 - Add request logging middleware
 - Consider adding rate limiting for production environments
+
+## Features Implemented
+
+✅ **CRUD Operations** - Create, Read, Update, Delete tasks
+✅ **Filtering** - Filter tasks by completion status (`?completed=true/false`)
+✅ **Sorting** - Sort tasks by creation date (`?sort=asc` for oldest first, `?sort=desc` for newest first)
+✅ **Priority Management** - Low, medium, and high priority levels
+✅ **Priority Filtering** - Get tasks by specific priority level
+✅ **Validation** - Input validation for all fields including priority
+✅ **Error Handling** - Comprehensive error handling with appropriate status codes
+✅ **Logger Middleware** - Request/response logging with timestamps and response times
+✅ **Auto-generated Timestamps** - Automatic `createdAt` timestamp on task creation
+✅ **REST API Best Practices** - Proper HTTP methods and status codes
 
 ---
 

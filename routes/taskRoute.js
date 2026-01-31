@@ -3,8 +3,11 @@ const taskController = require('../controllers/taskController');
 
 const router = express.Router();
 
-// Get all tasks 
+// Get all tasks (with optional filtering and sorting)
 router.get('/', taskController.getAllTasks);
+
+// Get tasks by priority level (must be before /:id route)
+router.get('/priority/:level', taskController.getTasksByPriority);
 
 // Get a specific task by ID
 router.get('/:id', taskController.getTaskById);
