@@ -2,8 +2,18 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
+const taskRoute = require('./routes/taskRoute');
+const loggerMiddleware = require('./middleware/loggerMiddleware');
+
+// Logger middleware (should be first)
+app.use(loggerMiddleware);
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/tasks', taskRoute);
+
 
 app.listen(port, (err) => {
     if (err) {
