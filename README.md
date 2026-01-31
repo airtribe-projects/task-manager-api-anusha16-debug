@@ -83,25 +83,25 @@ The API will be available at: `http://localhost:3000`
 
 ### Base URL
 ```
-http://localhost:3000/api/v1/tasks
+http://localhost:3000/tasks
 ```
 
 ### Endpoints Overview
 
 | Method | Endpoint | Description | Status Codes |
 |--------|----------|-------------|--------------|
-| GET | `/api/v1/tasks` | Retrieve all tasks | 200, 500 |
-| GET | `/api/v1/tasks/:id` | Retrieve a specific task by ID | 200, 404, 500 |
-| POST | `/api/v1/tasks` | Create a new task | 201, 500 |
-| PUT | `/api/v1/tasks/:id` | Update an existing task | 200, 404, 500 |
-| DELETE | `/api/v1/tasks/:id` | Delete a task | 204, 404, 500 |
+| GET | `/tasks` | Retrieve all tasks | 200, 500 |
+| GET | `/tasks/:id` | Retrieve a specific task by ID | 200, 404, 500 |
+| POST | `/tasks` | Create a new task | 201, 500 |
+| PUT | `/tasks/:id` | Update an existing task | 200, 404, 500 |
+| DELETE | `/tasks/:id` | Delete a task | 204, 404, 500 |
 
 ## Request/Response Examples
 
 ### 1. Get All Tasks
 **Request:**
 ```http
-GET http://localhost:3000/api/v1/tasks
+GET http://localhost:3000/tasks
 ```
 
 **Response:** `200 OK`
@@ -125,7 +125,7 @@ GET http://localhost:3000/api/v1/tasks
 ### 2. Get a Specific Task
 **Request:**
 ```http
-GET http://localhost:3000/api/v1/tasks/1
+GET http://localhost:3000/tasks/1
 ```
 
 **Response:** `200 OK`
@@ -148,7 +148,7 @@ GET http://localhost:3000/api/v1/tasks/1
 ### 3. Create a New Task
 **Request:**
 ```http
-POST http://localhost:3000/api/v1/tasks
+POST http://localhost:3000/tasks
 Content-Type: application/json
 
 {
@@ -171,7 +171,7 @@ Content-Type: application/json
 ### 4. Update a Task
 **Request:**
 ```http
-PUT http://localhost:3000/api/v1/tasks/1
+PUT http://localhost:3000/tasks/1
 Content-Type: application/json
 
 {
@@ -201,7 +201,7 @@ Content-Type: application/json
 ### 5. Delete a Task
 **Request:**
 ```http
-DELETE http://localhost:3000/api/v1/tasks/1
+DELETE http://localhost:3000/tasks/1
 ```
 
 **Response:** `204 No Content`
@@ -368,16 +368,16 @@ npm install
 ### Using curl:
 ```bash
 # Get all tasks
-curl http://localhost:3000/api/v1/tasks
+curl http://localhost:3000/tasks
 
 # Create a task
-curl -X POST http://localhost:3000/api/v1/tasks \
+curl -X POST http://localhost:3000/tasks \
   -H "Content-Type: application/json" \
   -d '{"title":"New Task","description":"Task description","completed":false}'
 ```
 
 ### Using Postman:
-1. Import the base URL: `http://localhost:3000/api/v1/tasks`
+1. Import the base URL: `http://localhost:3000/tasks`
 2. Create requests for each endpoint
 3. Test different scenarios
 
@@ -385,10 +385,10 @@ curl -X POST http://localhost:3000/api/v1/tasks \
 Create a `.http` file:
 ```http
 ### Get all tasks
-GET http://localhost:3000/api/v1/tasks
+GET http://localhost:3000/tasks
 
 ### Create a task
-POST http://localhost:3000/api/v1/tasks
+POST http://localhost:3000/tasks
 Content-Type: application/json
 
 {
